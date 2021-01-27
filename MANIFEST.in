@@ -1,0 +1,8 @@
+include AUTHORS.txt
+include LICENSE.txt
+include README.md
+include pyproject.toml
+include setup.py
+
+exclude .travis.yml
+exclude tox.ini
