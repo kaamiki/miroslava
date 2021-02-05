@@ -1,17 +1,58 @@
-"""Miroslava system-wide constants"""
+"""Miroslava system-wide constants."""
 
 import getpass
 import pathlib
 import sys
 
 # Operating system details
-# This is needed for designing and handling different control flows
-# for different operating systems.
+# This variable offers only the name of the host operating system
+# which is sufficient enough for handling an alternate control flow
+# depending upon different operating systems.
 OS = sys.platform
 
+# Flag to conditionally check if the host operating system is Windows.
+IS_WINDOWS = OS == "win32"
+
 # Current logged user
-USR = getpass.getuser()
+# This variable offers the name of the currently logged user. Kindly
+# note that it does not consider other login accounts. The behaviour
+# may be unexpected for Guest User accounts.
+SESSION_USER = getpass.getuser()
 
 # Operating system filesystem seperator
-# `/` for *nix based and `\\` for Windows operating systems.
-SEP = pathlib.os.sep
+# This variable helps building of operating system agnostic file paths.
+PATH_SEP = pathlib.os.sep
+
+# Canonical path
+# This is the base or the root path by default where all the
+# cache/data/logs/models would be stored. The `CANONICAL_PATH` can
+# be overridden via `SOME_FUTURE_OBJECT`.
+CANONICAL_PATH = pathlib.Path().home()
+
+# Default datetime format
+STANDARD_DATETIME_FMT = "%Y-%m-%d %H:%M:%S"  # 2020-04-11 22:17:00
+
+# Time zone specifications
+# By default, Miroslava uses `UTC` time zone for handling all datetime
+# events. Although the behaviour can be easily overridden by changing
+# the status of `USE_LOCAL_TIME_ZONE` flag.
+TIME_ZONE = "UTC"
+
+# If True, Miroslava will use naive local time zone.
+USE_LOCAL_TIME_ZONE = False
+
+# Logging module constants
+# Default logging format. This format intends to provide a detailed
+# overview for logged events.
+LOGGING_FMT = (
+    "%(asctime)s.%(msecs)03d %(levelname)8s %(process)8d --- "
+    "[%(threadName)16s] %(pathname)32s.%(lineno)d : %(message)s"
+)
+
+LOGGING_EXCEPTION_FMT = "{}: {} {}on line {}"
+
+# Datetime format to use while logging events.
+LOGGING_DATETIME_FMT = "%b %d, %Y %H:%M:%S"  # Apr 11, 2020 22:17:00
+
+# Logged module name length limit
+LOGGING_MODULE_NAME_LIMIT = 30
