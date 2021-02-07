@@ -29,30 +29,37 @@ PATH_SEP = pathlib.os.sep
 # be overridden via `SOME_FUTURE_OBJECT`.
 CANONICAL_PATH = pathlib.Path().home()
 
-# Default datetime format
+# Datetime formats
+# Default datetime format for almost datetime related activities. This
+# format is the most common and is default for almost all cases.
 STANDARD_DATETIME_FMT = "%Y-%m-%d %H:%M:%S"  # 2020-04-11 22:17:00
 
+# Datetime format to use while logging events. This format offers more
+# clarity and avoids confusion between date and month (e.g. 05-04-2004).
+LOGGING_DATETIME_FMT = "%b %d, %Y %H:%M:%S"  # Apr 11, 2020 22:17:00
+
 # Time zone specifications
+# If True, Miroslava will use naive local time zone.
+USE_LOCAL_TIME_ZONE = False
+
 # By default, Miroslava uses `UTC` time zone for handling all datetime
 # events. Although the behaviour can be easily overridden by changing
 # the status of `USE_LOCAL_TIME_ZONE` flag.
 TIME_ZONE = "UTC"
 
-# If True, Miroslava will use naive local time zone.
-USE_LOCAL_TIME_ZONE = False
-
-# Logging module constants
-# Default logging format. This format intends to provide a detailed
-# overview for logged events.
-LOGGING_FMT = (
-    "%(asctime)s.%(msecs)03d %(levelname)8s %(process)8d --- "
-    "[%(threadName)16s] %(pathname)32s.%(lineno)d : %(message)s"
+# Logging formats
+# This format intends to provide a detailed overview for logged events.
+LOGGING_MSG_FMT = (
+    "%(asctime)s.%(msecs)03d %(levelname)8s %(process)8d "
+    "[%(threadName)16s] %(pathname)30s:%(lineno)d - %(message)s"
 )
 
-LOGGING_EXCEPTION_FMT = "{}: {} {}on line {}"
+# Format to use while an exception is raised.
+LOGGING_EXC_FMT = "{}: {} {} line {}"
 
-# Datetime format to use while logging events.
-LOGGING_DATETIME_FMT = "%b %d, %Y %H:%M:%S"  # Apr 11, 2020 22:17:00
+# Regular Expressions
+# Expression to check the `%Z` (timezone parameter).
+TIME_ZONE_RE = r"(?:(?<=\%Z) | (?=\%Z))"
 
-# Logged module name length limit
-LOGGING_MODULE_NAME_LIMIT = 30
+# Expression to find the logging attribute padding length.
+LOGGING_ATTR_RE = r"\%\(\b{}\b\)(\d*)[d-s]"  # %(levelname)8s
