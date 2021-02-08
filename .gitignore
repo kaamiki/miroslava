@@ -59,6 +59,7 @@ venv.bak/
 
 # For Visual Studio Code
 .vscode/
+pyrightconfig.json
 
 # For Sublime Text
 *.sublime-workspace
