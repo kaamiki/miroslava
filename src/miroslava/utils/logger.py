@@ -3,7 +3,8 @@
 import logging
 import os
 import re
-from typing import Optional, Tuple
+import sys
+from typing import IO, Dict, Optional, Tuple
 
 from miroslava.config.internal import (
     LOGGING_ATTR_RE,
@@ -12,9 +13,9 @@ from miroslava.config.internal import (
     LOGGING_MSG_FMT,
     PATH_SEP,
 )
-from miroslava.utils.common import Singleton
+from miroslava.utils.common import Singleton, TTYPalette
 
-__all__ = ["Formatter"]
+__all__ = ["Formatter", "StreamHandler"]
 
 # NOTE: Most of the docstring is referenced from the original
 # logging module as we are not changing the behavior of the
@@ -22,8 +23,19 @@ __all__ = ["Formatter"]
 # simplicity, scalability and flexibility that is required in
 # most of the development cases.
 
+_tty_levels = {
+    logging.CRITICAL: TTYPalette.RED_1,
+    logging.ERROR: TTYPalette.DARK_ORANGE,
+    logging.WARNING: TTYPalette.YELLOW,
+    logging.INFO: TTYPalette.GREEN_1,
+    logging.DEBUG: TTYPalette.GREY_50,
+    logging.NOTSET: TTYPalette.AQUA,
+}
 
-class Formatter(logging.Formatter, metaclass=Singleton):
+_tty_reset = TTYPalette.DEFAULT
+
+
+class Formatter(logging.Formatter):
     """Formatter to convert a LogRecord to text.
 
     A Formatter need to know how a LogRecord is constructed. They are
@@ -43,7 +55,8 @@ class Formatter(logging.Formatter, metaclass=Singleton):
     framework.
 
     Args:
-        fmt (str, optional): Logging format. Defaults to `LOGGING_MSG_FMT`.
+        fmt (str, optional): Logging message format.
+            Defaults to `LOGGING_MSG_FMT`.
         datefmt (str, optional): Logging datetime format. Defaults to
             `LOGGING_DATETIME_FMT`.
         traceback (bool): Whether to format log messages with traceback.
@@ -119,7 +132,7 @@ class Formatter(logging.Formatter, metaclass=Singleton):
         the interpreter (stdin), `shell` would be returned.
 
         Args:
-            path (str): Pathname of the log event.
+            path (str): Pathname of the logged event.
 
         Returns:
             str: Formatted pathname value.
@@ -149,11 +162,72 @@ class Formatter(logging.Formatter, metaclass=Singleton):
         record.pathname = self.formatPath(record.pathname)
         if record.funcName != "<module>" and record.pathname != "shell":
             record.pathname += f".{record.funcName}()"
-        out = logging.Formatter(self.fmt, self.datefmt).format(record)
-        if not self.traceback:
-            if record.exc_text:
-                out, *_ = out.replace(
-                    str(record.exc_info[1]),
-                    self.formatException(record.exc_info),
-                ).partition("Traceback")
-        return out.strip("\n")
+        if record.exc_info:
+            record.msg = self.formatException(record.exc_info)
+            record.exc_info = record.exc_text = None
+        return logging.Formatter(self.fmt, self.datefmt).format(record)
+
+
+class StreamHandler(logging.StreamHandler, metaclass=Singleton):
+    """Add colors to the TTY interface.
+
+    A handler class which writes logging records, color formatted, to
+    a stream. Note that this class does not close the stream, as
+    sys.stdout or sys.stderr may be used.
+
+    Args:
+        stream (IO): IO stream. Defaults to sys.stdout.
+        only_level (bool): Whether to colorize only the levels. Defaults
+            to True.
+        **kwargs: Keyword list of log attrs and colors.
+
+    Attributes:
+        only_level (bool): Whether to colorize only the levels. Defaults
+            to True.
+        **kwargs: Keyword list of log attrs and colors.
+
+    Returns:
+        str: Color formatted log output.
+
+    See Also:
+        logging.StreamHandler:
+            Logging handler class from standard library.
+        miroslava.config.colors.TTYPalette:
+            Class which provides color codes for a TTY interface.
+        miroslava.utils.common.Singleton:
+            A thread-safe implementation of Singleton design pattern.
+
+    """
+
+    def __init__(
+        self,
+        stream: Optional[IO[str]] = sys.stdout,
+        only_level: bool = True,
+        **kwargs: Dict[str, str],
+    ) -> None:
+        self.only_level = only_level
+        self.kwargs = {k: getattr(TTYPalette, v) for k, v in kwargs.items()}
+        super().__init__(stream=stream)
+
+    def format(self, record: logging.LogRecord) -> str:
+        """Format the attrs with colors.
+
+        Args:
+            record (LogRecord): Instance of an event being logged.
+
+        Returns:
+            str: Color formatted log output.
+
+        """
+        out = logging.StreamHandler.format(self, record)
+        if self.only_level:
+            out = out.replace(
+                record.levelname,
+                _tty_levels[record.levelno] + record.levelname + _tty_reset,
+            )
+            return out
+        for key, value in self.kwargs.items():
+            if hasattr(record, key):
+                attr = str(getattr(record, key))
+                out = out.replace(attr, value + attr + _tty_reset)
+        return out
