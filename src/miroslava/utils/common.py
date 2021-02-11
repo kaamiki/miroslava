@@ -38,6 +38,8 @@ class Singleton(type):
         <__main__.SomeClass object at 0x7f3f2d7db820>
         >>> x2
         <__main__.SomeClass object at 0x7f3f2d7db820>
+        >>> x1 is x2
+        True
         >>>
 
     References:
