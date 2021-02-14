@@ -40,9 +40,9 @@ setup(
     install_requires=dependencies,
     extras_require={
         "dev": [
-            "autopep8",
             "black",
             "check-manifest",
+            "flake8",
             "pytest",
             "pytest-cov",
             "tox",
