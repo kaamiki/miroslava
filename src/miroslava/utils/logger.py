@@ -7,10 +7,10 @@ import sys
 from typing import IO, Dict, Optional, Tuple
 
 from miroslava.config.internal import (
-    LOGGING_ATTR_RE,
-    LOGGING_DATETIME_FMT,
-    LOGGING_EXC_FMT,
-    LOGGING_MSG_FMT,
+    LOGGER_ATTR_RE,
+    LOGGER_DATETIME_FMT,
+    LOGGER_EXC_FMT,
+    LOGGER_MSG_FMT,
     PATH_SEP,
 )
 from miroslava.utils.common import Singleton, TTYPalette
@@ -56,16 +56,16 @@ class Formatter(logging.Formatter):
 
     Args:
         fmt (str, optional): Logging message format.
-            Defaults to `LOGGING_MSG_FMT`.
+            Defaults to `LOGGER_MSG_FMT`.
         datefmt (str, optional): Logging datetime format. Defaults to
-            `LOGGING_DATETIME_FMT`.
+            `LOGGER_DATETIME_FMT`.
         traceback (bool): Whether to format log messages with traceback.
             Defaults to False.
 
     Attributes:
-        fmt (str): Logging format. Defaults to `LOGGING_MSG_FMT`.
+        fmt (str): Logging format. Defaults to `LOGGER_MSG_FMT`.
         datefmt (str): Logging datetime format. Defaults to
-            `LOGGING_DATETIME_FMT`.
+            `LOGGER_DATETIME_FMT`.
         traceback (bool): Whether to format log messages with traceback.
             Defaults to False.
         limit (int): Limit the length of pathname attribute.
@@ -88,14 +88,14 @@ class Formatter(logging.Formatter):
         traceback: bool = False,
     ) -> None:
         if not fmt:
-            fmt = LOGGING_MSG_FMT
+            fmt = LOGGER_MSG_FMT
         if not datefmt:
-            datefmt = LOGGING_DATETIME_FMT
+            datefmt = LOGGER_DATETIME_FMT
         self.fmt = fmt
         self.datefmt = datefmt
         self.traceback = traceback
-        self.limit = re.findall(LOGGING_ATTR_RE.format("pathname"), self.fmt)
-        self.limit = int(self.limit[0]) - 3
+        self.limit = re.findall(LOGGER_ATTR_RE.format("pathname"), self.fmt)
+        self.limit = int(self.limit[0]) - 3  # 3 -> ...
 
     def formatException(self, ei: Tuple) -> str:
         """Format and return the specified exception information
@@ -118,7 +118,7 @@ class Formatter(logging.Formatter):
         exc_fnc = exc_tbk.tb_frame.f_code.co_name
         exc_obj = "on" if exc_fnc == "<module>" else f"in {exc_fnc}() on"
         exc_tbk = exc_obj, exc_tbk.tb_lineno
-        return LOGGING_EXC_FMT.format(exc_cls.__name__, exc_msg, *exc_tbk)
+        return LOGGER_EXC_FMT.format(exc_cls.__name__, exc_msg, *exc_tbk)
 
     def formatPath(self, path: str) -> str:
         """Format path with module-like structure.

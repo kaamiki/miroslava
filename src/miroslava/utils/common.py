@@ -4,7 +4,7 @@ import os
 from threading import Lock
 
 from miroslava.config import colors
-from miroslava.config.internal import IS_WINDOWS
+from miroslava.config.internal import WINDOWS_OS
 
 __all__ = ["Singleton", "TTYPalette", "tty_colors"]
 
@@ -81,7 +81,7 @@ class TTYPalette(object):
 
     """
 
-    if IS_WINDOWS:
+    if WINDOWS_OS:
         os.system("color")
     for tty_color in tty_colors:
         locals()[tty_color[10:]] = getattr(colors, tty_color)
