@@ -18,6 +18,8 @@ HOME_PATH = _os.expanduser("~")
 ROOT_PATH = _os.join(HOME_PATH, ROOT)
 LOGGER_PATH = _os.join(ROOT_PATH, LOGGED_USER, LOGS)
 
+ENCODING = "utf-8"
+
 DEFAULT_DATETIME_FMT = "%Y-%m-%d %H:%M:%S"
 LOGGER_DATETIME_FMT = "%b %d, %Y %H:%M:%S"
 
