@@ -12,6 +12,8 @@ from miroslava.config.internal import (
 )
 from miroslava.utils.common import Singleton, TTYPalette
 
+__all__ = []
+
 # NOTE: Most of the docstring is referenced from the original logging
 # module since this logger does not intent to change the behavior of
 # the underlying implementation but rather adds some level of simplicity
