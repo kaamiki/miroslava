@@ -6,6 +6,8 @@ import sys
 
 OS = sys.platform
 WINDOWS_OS = OS == "win32"
+# NOTE: Tox breaks `getpass.getuser` on Windows
+# https://github.com/tox-dev/tox/issues/1455
 LOGGED_USER = getpass.getuser()
 
 ROOT = ".miroslava"
@@ -17,6 +19,8 @@ PATH_SEP = _os.sep
 HOME_PATH = _os.expanduser("~")
 ROOT_PATH = _os.join(HOME_PATH, ROOT)
 LOGGER_PATH = _os.join(ROOT_PATH, LOGGED_USER, LOGS)
+
+ENCODING = "utf-8"
 
 DEFAULT_DATETIME_FMT = "%Y-%m-%d %H:%M:%S"
 LOGGER_DATETIME_FMT = "%b %d, %Y %H:%M:%S"
