@@ -2,17 +2,20 @@
 
 import logging
 import sys
-from typing import IO, Dict, Optional, Tuple
+from logging.handlers import RotatingFileHandler as FileHandler
+from os.path import abspath, basename, join, splitext
+from typing import IO, Any, Dict, Optional, Tuple, Union
 
 from miroslava.config.internal import (
     LOGGER_DATETIME_FMT,
     LOGGER_EXC_FMT,
     LOGGER_MSG_FMT,
+    LOGGER_PATH,
     PATH_SEP,
 )
 from miroslava.utils.common import Singleton, TTYPalette
 
-__all__ = []
+__all__ = ["Formatter", "StreamHandler", "Logger"]
 
 # NOTE: Most of the docstring is referenced from the original logging
 # module since this logger does not intent to change the behavior of
@@ -88,20 +91,21 @@ class Formatter(logging.Formatter, metaclass=Singleton):
         self.date_fmt = date_fmt
 
     def formatException(self, ei: Tuple) -> str:
-        """Format and return the specified exception information
-        as a string.
+        """Format exception information as text.
 
         Please note that this implementation does not work directly.
-        The standard `logging.Formatter()` is needed for creating the
-        `str` format of the logged record which adds unnecessary `\n`
-        characters to the output which needs to be skipped.
+        The standard `logging.Formatter()` is required for creating the
+        `str` format of the logged record which adds an unnecessary
+        `\\n` to the output which needs to be skipped.
 
         Args:
-            ei (_SysExcInfoType): Exception message to log.
-                _SysExcInfoType = Tuple(type, BaseException, TracebackType)
+            ei (_SysExcInfoType): Exception information.
+
+        Note:
+            _SysExcInfoType is Tuple(type, BaseException, TracebackType)
 
         Returns:
-            str: Formatted exception string without `\n` characters.
+            str: Formatted exception information.
 
         """
         exc_cls, exc_msg, exc_tbk = ei
@@ -223,3 +227,153 @@ class StreamHandler(logging.StreamHandler, metaclass=Singleton):
                 attr = str(getattr(record, key))
                 out = out.replace(attr, value + attr + _tty_reset)
         return out
+
+
+class Logger(logging.LoggerAdapter):
+    """Logger for logging events.
+
+    Logger offers flexible logging using the different arguments that
+    are passed to it. If nothing is supplied, the default settings are
+    used. Logger relies on its own log message format as it seems to
+    provide all the essential information by default. However, as said
+    above the default behavior can be overridden using the arguments.
+
+    Logger allows user to set a minimum logging level which ensures all
+    the events equal and above the set level are logged. Logger enables
+    logging for a module or for the entire process and offers options
+    to colorize the logged attributes as well.
+
+    Args:
+        name (str): Root instance for logging. Defaults to None.
+        level (int, str, optional): Minimum logging level to record.
+            Defaults to `logging.INFO`.
+        file (str, optional): Output log file pathname. Defaults to
+            module name which calls the logger.
+        log_fmt (str, optional): Logging message format.
+            Defaults to `LOGGER_MSG_FMT`.
+        date_fmt (str, optional): Logging datetime format. Defaults to
+            `LOGGER_DATETIME_FMT`.
+        only_level (bool): Whether to colorize only the levels.
+            Defaults to True.
+        filesize (float, int): Maximum size the output log file can be
+            in bytes. Defaults to 10 MB.
+        backups (int): Maximum backups to retain after the rollover.
+            Defaults to 5.
+        extra (dict, optional): Adds extra contextual information to the
+            log messages.
+        **attrs: Keyword list of log attributes and colors.
+
+
+    Attributes:
+        ext (str): Log file extension.
+        logger (logging.Logger): Logger object which logs the events.
+        extra (dict): Adds extra contextual information to the log
+            messages.
+
+    Notes:
+        By default, the output log file if created normally grows
+        indefinitely. You can specify particular value of `filesize`
+        and `backups` to allow this file to rollover at a predetermined
+        size.
+
+        The rollover happens whenever the current log file is nearly
+        `filesize` in length. If the `backups` is >= 1, the system will
+        successively create new files with the same pathname as the
+        base file, but with the extensions ".1", ".2", etc. appended to
+        it. For example, with `backups` of 5 and output log name of
+        "xa.log", you would get "xa.log", "xa.log.1", "xa.log.2", ...
+        through "xa.log.5".
+
+        If `filesize` is zero, rollover never occurs.
+
+    Examples:
+        >>> logger = Logger()
+        >>> def f():
+        ...     try:
+        ...         5 / 0
+        ...     except Exception as exc:
+        ...        logger.exception(exc)
+        ...
+        >>> f()
+        Apr 11, 2020...  ERROR [...]  shell:004 - ZeroDivisionError: ...
+        >>>
+
+    See Also:
+        logging.LoggerAdapter:
+            An adapter for loggers which makes it easier to specify
+            contextual information in logging output.
+        logging.handlers.RotatingFileHandler:
+            Handler for logging to a set of files, which switches from
+            one file to the next when the current file reaches a
+            certain size.
+        miroslava.utils.logger.Formatter:
+            Formatter class to convert a LogRecord to text.
+        miroslava.utils.logger.StreamHandler:
+            Class to add colors to the TTY interface.
+
+    """
+
+    ext = ".log"
+
+    def __init__(
+        self,
+        name: Optional[str] = None,
+        level: Optional[Union[int, str]] = None,
+        file: Optional[str] = None,
+        log_fmt: Optional[str] = None,
+        date_fmt: Optional[str] = None,
+        only_level: bool = True,
+        filesize: Union[float, int] = 10e6,
+        backups: int = 5,
+        extra: Optional[Dict[str, Any]] = None,
+        **attrs: Dict[str, str],
+    ) -> None:
+        formatter = Formatter(log_fmt, date_fmt)
+        stream = StreamHandler(only_level=only_level, **attrs)
+        stream.setFormatter(formatter)
+        self.logger = logging.getLogger(name)
+        self.logger.setLevel(level if level else logging.INFO)
+        self.logger.addHandler(stream)
+        if file is None:
+            try:
+                caller = basename(abspath(sys.modules["__main__"].__file__))
+                file = join(LOGGER_PATH, (splitext(caller)[0] + self.ext))
+            except AttributeError:
+                file = False
+        if file is not False:
+            file = FileHandler(file, maxBytes=filesize, backupCount=backups)
+            file.setFormatter(formatter)
+            self.logger.addHandler(file)
+        self.extra = extra if extra else {}
+
+    def debug(self, msg: Any) -> None:
+        """Log message with `DEBUG` level severity."""
+        for line in str(msg).splitlines():
+            self.logger.debug(line, extra=self.extra, stacklevel=2)
+
+    def info(self, msg: Any) -> None:
+        """Log message with `INFO` level severity."""
+        for line in str(msg).splitlines():
+            self.logger.info(line, extra=self.extra, stacklevel=2)
+
+    def warning(self, msg: Any) -> None:
+        """Log message with `WARNING` level severity."""
+        for line in str(msg).splitlines():
+            self.logger.warning(line, extra=self.extra, stacklevel=2)
+
+    def error(self, msg: Any) -> None:
+        """Log message with `ERROR` level severity."""
+        for line in str(msg).splitlines():
+            self.logger.error(line, extra=self.extra, stacklevel=2)
+
+    def critical(self, msg: Any) -> None:
+        """Log message with `CRITICAL` level severity."""
+        for line in str(msg).splitlines():
+            self.logger.critical(line, extra=self.extra, stacklevel=2)
+
+    def exception(self, msg: Any) -> None:
+        """Log exception with traceback."""
+        self.logger.error(msg, exc_info=True, extra=self.extra, stacklevel=2)
+
+    fatal = critical
+    warn = warning
