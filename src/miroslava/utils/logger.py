@@ -2,6 +2,7 @@
 
 import logging
 import sys
+from functools import lru_cache
 from logging.handlers import RotatingFileHandler as FileHandler
 from os.path import abspath, basename, join, splitext
 from typing import IO, Any, Dict, Optional, Tuple, Union
@@ -15,7 +16,7 @@ from miroslava.config.internal import (
 )
 from miroslava.utils.common import Singleton, TTYPalette
 
-__all__ = ["Formatter", "StreamHandler", "Logger"]
+__all__ = ["Logger", "Formatter", "StreamHandler"]
 
 # NOTE: Most of the docstring is referenced from the original logging
 # module since this logger does not intent to change the behavior of
@@ -90,12 +91,13 @@ class Formatter(logging.Formatter, metaclass=Singleton):
         self.log_fmt = log_fmt
         self.date_fmt = date_fmt
 
+    @lru_cache
     def formatException(self, ei: Tuple) -> str:
         """Format exception information as text.
 
         Please note that this implementation does not work directly.
-        The standard `logging.Formatter()` is required for creating the
-        `str` format of the logged record which adds an unnecessary
+        The standard `logging.Formatter()` is required for creating
+        the `str` format of the logged record which adds an unnecessary
         `\\n` to the output which needs to be skipped.
 
         Args:
@@ -114,6 +116,7 @@ class Formatter(logging.Formatter, metaclass=Singleton):
         exc_tbk = exc_obj, exc_tbk.tb_lineno
         return LOGGER_EXC_FMT.format(exc_cls.__name__, exc_msg, *exc_tbk)
 
+    @lru_cache
     def formatPath(self, path: str, fnc: str, limit: int = 27) -> str:
         """Format path with module-like structure.
 
@@ -142,6 +145,7 @@ class Formatter(logging.Formatter, metaclass=Singleton):
             path = "..." + path[-limit:]
         return path
 
+    @lru_cache
     def format(self, record: logging.LogRecord) -> str:
         """Format the specified record as text.
 
@@ -205,6 +209,7 @@ class StreamHandler(logging.StreamHandler, metaclass=Singleton):
         self.kwargs = {k: getattr(TTYPalette, v) for k, v in kwargs.items()}
         super().__init__(stream=stream)
 
+    @lru_cache
     def format(self, record: logging.LogRecord) -> str:
         """Format the attrs with colors.
 
