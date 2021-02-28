@@ -10,10 +10,10 @@ jobs:
     name: Running for ${{ matrix.os }} ...
     runs-on: ${{ matrix.os }}
     strategy:
-      max-parallel: 5
+      max-parallel: 4
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.6", "3.7", "3.8", "3.9", pypy3]
+        os: [ubuntu-latest]
+        python-version: ["3.6", "3.7", "3.8", "3.9"]
 
     steps:
       - uses: actions/checkout@v2
@@ -21,9 +21,7 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Setting up virtualenv and installing dependencies ...
-        run: python -m pip install --upgrade tox virtualenv setuptools pip pytest
+      - name: Installing dependencies ...
+        run: python -m pip install --upgrade pip tox
       - name: Testing with Tox ...
         run: tox -e py
-      - name: Testing with Pytest ...
-        run: pytest
