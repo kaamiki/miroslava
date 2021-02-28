@@ -24,13 +24,14 @@ jobs:
       - name: Installing dependencies ...
         run: |
           python -m pip install --upgrade pip
-          python -m pip install setuptools virtualenv tox black flake8 pytest
+          python -m pip install setuptools virtualenv
+          python -m pip install tox black flake8 pytest
       - name: PEP8-ifying ...
         run: |
           black src/miroslava tests/ setup.py
           flake8 src/miroslava tests/ setup.py --count --select=E9,F63,F7,F82 --show-source --statistics
       - name: Testing with Tox ...
-        run: tox -e py
+        run: tox -e py${{ matrix.python-version }}
       - name: Testing with Pytest ...
         run: |
           pytest {posargs:tests}
