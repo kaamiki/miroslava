@@ -7,6 +7,7 @@ on:
 
 jobs:
   miroslava-pipeline:
+    name: Workflow running on ${{ matrix.os }} ...
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
