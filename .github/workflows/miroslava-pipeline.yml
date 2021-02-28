@@ -1,34 +1,33 @@
 name: Miroslava Pipeline
 
 on:
+  pull_request:
   push:
-    branches: [master]
+    branches: [main]
 
 jobs:
   miroslava-pipeline:
+    name: Running for ${{ matrix.os }} ...
     runs-on: ${{ matrix.os }}
     strategy:
+      max-parallel: 5
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest]
         python-version: ["3.6", "3.7", "3.8", "3.9", pypy3]
 
     steps:
-      - uses: actions/checkout@v2
       - name: Setting up Python ${{ matrix.python-version }} ...
+      - uses: actions/checkout@v2
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Installing dependencies ...
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install setuptools virtualenv tox black flake8 pytest
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-      - name: PEP8-ify
-        run: |
-          black src/miroslava tests/ setup.py
-          flake8 src/miroslava tests/ setup.py --count --select=E9,F63,F7,F82 --show-source --statistics
+      - name: Setting up virtual environment and installing dependencies ...
+        run: python -m pip install --upgrade tox virtualenv setuptools pip
+      # - name: PEP8-ifying ...
+      #   run: |
+      #     black src/miroslava tests/ setup.py
+      #     flake8 src/miroslava tests/ setup.py --count --select=E9,F63,F7,F82 --show-source --statistics
       - name: Testing with Tox ...
         run: tox -e py
       - name: Testing with Pytest ...
-        run: |
-          pytest {posargs:tests}
+        run: pytest tests/
