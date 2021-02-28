@@ -30,8 +30,8 @@ jobs:
         run: |
           black src/miroslava tests/ setup.py
           flake8 src/miroslava tests/ setup.py --count --select=E9,F63,F7,F82 --show-source --statistics
-      - name: Testing with Tox ...
-        run: tox -e py${{ matrix.python-version }}
+      # - name: Testing with Tox ...
+      #   run: tox -e py3
       - name: Testing with Pytest ...
         run: |
           pytest {posargs:tests}
