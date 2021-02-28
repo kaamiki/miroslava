@@ -1,8 +1,28 @@
-"""Miroslava logger."""
+"""Logging with Miroslava.
+
+This module offers tools that help with logging events.
+It relies on the original `logging` module from the standard python
+library as Miroslava's logging implementation doesn't intent to change
+or modify the existing work put behind the original logging module but
+rather adds some* level of simplicity and flexibility that is most
+often required in many development scenarios.
+
+Although this module doesn't cover all the quintessential requirements
+but rather comes close to meet the end-user's expectations.
+
+Attributes:
+    _tty_levels (dict): Dictionary of logging levels and corresponding
+        colors for logging.
+    _tty_reset (str): Code to reset the TTY color mode to normal.
+
+Todo:
+    * Option to disable one-line traceback message.
+    * Multiple log rotation options.
+
+"""
 
 import logging
 import sys
-from functools import lru_cache
 from logging.handlers import RotatingFileHandler as FileHandler
 from os.path import abspath, basename, join, splitext
 from typing import IO, Any, Dict, Optional, Tuple, Union
@@ -91,7 +111,6 @@ class Formatter(logging.Formatter, metaclass=Singleton):
         self.log_fmt = log_fmt
         self.date_fmt = date_fmt
 
-    @lru_cache
     def formatException(self, ei: Tuple) -> str:
         """Format exception information as text.
 
@@ -116,7 +135,6 @@ class Formatter(logging.Formatter, metaclass=Singleton):
         exc_tbk = exc_obj, exc_tbk.tb_lineno
         return LOGGER_EXC_FMT.format(exc_cls.__name__, exc_msg, *exc_tbk)
 
-    @lru_cache
     def formatPath(self, path: str, fnc: str, limit: int = 27) -> str:
         """Format path with module-like structure.
 
@@ -145,7 +163,6 @@ class Formatter(logging.Formatter, metaclass=Singleton):
             path = "..." + path[-limit:]
         return path
 
-    @lru_cache
     def format(self, record: logging.LogRecord) -> str:
         """Format the specified record as text.
 
@@ -209,7 +226,6 @@ class StreamHandler(logging.StreamHandler, metaclass=Singleton):
         self.kwargs = {k: getattr(TTYPalette, v) for k, v in kwargs.items()}
         super().__init__(stream=stream)
 
-    @lru_cache
     def format(self, record: logging.LogRecord) -> str:
         """Format the attrs with colors.
 
