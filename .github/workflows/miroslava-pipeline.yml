@@ -34,4 +34,4 @@ jobs:
       #   run: tox -e py3
       - name: Testing with Pytest ...
         run: |
-          pytest {posargs:tests}
+          pytest tests/
