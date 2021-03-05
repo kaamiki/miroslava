@@ -7,8 +7,6 @@ import sys
 
 OS = sys.platform
 WINDOWS_OS = OS == "win32"
-# NOTE: Tox breaks `getpass.getuser` on Windows
-# https://github.com/tox-dev/tox/issues/1455
 LOGGED_USER = os.getlogin() if WINDOWS_OS else getpass.getuser()
 
 ROOT = ".miroslava"
