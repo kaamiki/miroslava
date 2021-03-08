@@ -6,6 +6,8 @@ See https://github.com/kaamiki/miroslava for more help.
 
 from setuptools import find_packages, setup
 
+from src.miroslava import _about as about
+
 # See https://pypi.python.org/pypi?%3Aaction=list_classifiers for the
 # complete list of available classifiers.
 classifiers = [
@@ -29,6 +31,8 @@ dev_dependencies = [
     "black",
     "flake8",
     "mypy",
+    "sphinx",
+    "sphinx_rtd_theme",
 ]
 
 test_dependencies = [
@@ -37,17 +41,18 @@ test_dependencies = [
 ]
 
 setup(
-    name="miroslava",
-    version="1.0.0",
-    author="XAMES3",
-    author_email="xames3.developer@gmail.com",
+    name=about.__package__,
+    version=about.__version__,
+    author=about.__author__,
+    author_email=about.__email__,
+    maintainer=about.__maintainer__,
+    license=about.__license__,
     url="https://github.com/kaamiki/miroslava",
     description="A simple sandbox environment",
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
-    classifiers=classifiers,
     keywords="python, miroslava, kaamiki",
-    license="MIT",
+    classifiers=classifiers,
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     python_requires=">=3.6",
