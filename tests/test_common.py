@@ -1,12 +1,13 @@
 import pytest
-from miroslava.utils import Singleton, TTYPalette
+from miroslava.utils import Singleton
+from miroslava.utils import TTYPalette
 
 
 class TestSingletonClass(metaclass=Singleton):
     pass
 
 
-def test_singleton():
+def test_singleton() -> None:
     x1 = TestSingletonClass()
     x2 = TestSingletonClass()
     assert x1 is x2
@@ -21,5 +22,5 @@ def test_singleton():
         ("PLUM_1", "\u001b[38;5;219m"),
     ),
 )
-def test_ttypalette(color, code):
+def test_ttypalette(color: str, code: str) -> None:
     assert getattr(TTYPalette, color) == code
