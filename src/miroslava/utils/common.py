@@ -2,6 +2,8 @@
 
 import os
 from threading import Lock
+from typing import Any
+from typing import Dict
 
 from miroslava.config import colors
 from miroslava.config.internal import WINDOWS_OS
@@ -10,50 +12,29 @@ __all__ = ["Singleton", "TTYPalette", "tty_colors"]
 
 
 class Singleton(type):
-    """A `thread-safe` implementation of Singleton design pattern.
+    r"""Thread-safe implementation of singleton design pattern.
 
-    Singleton is a creational design pattern, which ensures that only
-    a single object of its kind exist and provides a single point of
-    access to it for any other code.
+    It ensures only a ``single instance`` of the class is available
+    at runtime. See singletons_ in python and their implementations_.
 
-    The below is a `thread-safe` implementation of the Singleton design
-    pattern. This will let the users instantiate the derived class
-    multiple times and still would refer to the same object.
+    To incorporate Singleton in a class, use it like a ``metaclass``.
 
-    Args:
-        *args: Variable length argument list.
-        **kwargs: Arbitrary keyword arguments.
+    .. code-block:: python
 
-    Attributes:
-        instances (dict): Instances of class that have initialise.
-        lock (Lock): Thread lock object.
+        class Foo(metaclass=Singleton):
 
-    Examples:
-        >>> class SomeClass(metaclass=Singleton):
-        ...     pass
-        ...
-        >>> x1 = SomeClass()
-        >>> x2 = SomeClass()
-        >>> x1
-        <__main__.SomeClass object at 0x7f3f2d7db820>
-        >>> x2
-        <__main__.SomeClass object at 0x7f3f2d7db820>
-        >>> x1 is x2
-        True
-        >>>
+            def __init__(self):
+                pass
 
-    References:
-        [1] See https://stackoverflow.com/q/6760685 for more ways for
-            implementing singletons in code.
-        [2] See https://refactoring.guru/design-patterns/singleton/python/example
-            for better understanding of the below implementation.
+    .. _singletons: https://refactoring.guru/design-patterns/singleton/python/example
+    .. _implementations: https://stackoverflow.com/q/6760685
 
     """
 
-    instances = {}
+    instances: Dict["Singleton", type] = {}
     lock = Lock()
 
-    def __call__(cls, *args, **kwargs):
+    def __call__(cls, *args: Any, **kwargs: Any) -> type:
         """Callable singleton instance."""
         with cls.lock:
             if cls not in cls.instances:
@@ -66,18 +47,12 @@ tty_colors = (color for color in dir(colors) if tty_color_check(color))
 
 
 class TTYPalette(object):
-    """Color palette for TTY.
+    r"""Color palette for TTY.
 
-    The class provides about 200+ color unique color options to use
-    from on a TTY interface.
+    This provides more than **200** unique color options to use on a
+    TTY interface. See how ANSI escapes work on `Windows TTY`_ shell.
 
-    Reference:
-        [1] See https://stackoverflow.com/a/64222858/14316408 for
-            rendering colors on Windows TTY (both Powershell and CMD)
-
-    See Also:
-        miroslava.config.colors:
-            Module which contains all the available colors for TTY.
+    .. _Windows TTY: https://stackoverflow.com/a/64222858/14316408
 
     """
 
