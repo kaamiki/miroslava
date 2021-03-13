@@ -4,9 +4,14 @@ See https://github.com/kaamiki/miroslava for more help.
 
 """
 
-from setuptools import find_packages, setup
+import sys
 
-from src.miroslava import _about as about
+from setuptools import find_packages
+from setuptools import setup
+
+sys.path.append("src/")
+
+from miroslava import _about as about  # noqa
 
 # See https://pypi.python.org/pypi?%3Aaction=list_classifiers for the
 # complete list of available classifiers.
