@@ -68,3 +68,4 @@ pyrightconfig.json
 # Scratchpad for experiments
 .scratch/
 *.bak
+docs/
