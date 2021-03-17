@@ -1,4 +1,4 @@
-"""Palette: Color palette for web and tty interfaces"""
+"""Palette: Color palette for web and tty interfaces."""
 
 TTY_COLOR_AQUA = "\u001b[38;5;14m"
 TTY_COLOR_AQUAMARINE_1 = "\u001b[38;5;122m"
