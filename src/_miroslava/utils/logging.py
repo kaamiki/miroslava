@@ -13,7 +13,7 @@ from typing import Optional
 from typing import Tuple
 from typing import Union
 
-from miroslava.utils.common import TTYPalette
+from _miroslava.utils.common import TTYPalette
 
 __all__ = [
     "FileHandler",

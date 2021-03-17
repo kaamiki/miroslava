@@ -1,27 +1,24 @@
-"""Collection of common utilities."""
+"""Common: Collection of commonly used tools and attributes."""
 
 import os
 from threading import Lock
 from typing import Any
 from typing import Dict
 
-from miroslava.config import colors
-from miroslava.config.internal import WINDOWS_OS
+from _miroslava import palette
 
-__all__ = ["Singleton", "TTYPalette", "tty_colors"]
+__all__ = ["SingletonMeta", "TTYPalette"]
 
 
-class Singleton(type):
-    r"""Thread-safe implementation of singleton design pattern.
+class SingletonMeta(type):
+    """Thread-safe implementation of singleton design pattern.
 
     It ensures only a ``single instance`` of the class is available
     at runtime. See singletons_ in python and their implementations_.
 
-    To incorporate Singleton in a class, use it like a ``metaclass``.
-
     .. code-block:: python
 
-        class Foo(metaclass=Singleton):
+        class Foo(metaclass=SingletonMeta):
 
             def __init__(self):
                 pass
@@ -31,7 +28,7 @@ class Singleton(type):
 
     """
 
-    instances: Dict["Singleton", type] = {}
+    instances: Dict["SingletonMeta", type] = {}
     lock = Lock()
 
     def __call__(cls, *args: Any, **kwargs: Any) -> type:
@@ -42,12 +39,8 @@ class Singleton(type):
         return cls.instances[cls]
 
 
-tty_color_check = lambda x: x.isupper() and x.startswith("TTY")
-tty_colors = (color for color in dir(colors) if tty_color_check(color))
-
-
 class TTYPalette(object):
-    r"""Color palette for TTY.
+    """Color palette for TTY.
 
     This provides more than **200** unique color options to use on a
     TTY interface. See how ANSI escapes work on `Windows TTY`_ shell.
@@ -56,8 +49,14 @@ class TTYPalette(object):
 
     """
 
-    if WINDOWS_OS:
+    colors = (
+        color
+        for color in dir(palette)
+        if color.isupper() and color.startswith("TTY")
+    )
+
+    if os.name == "nt":
         os.system("color")
-    for tty_color in tty_colors:
-        locals()[tty_color[10:]] = getattr(colors, tty_color)
-    del tty_color
+    for color in colors:
+        locals()[color[10:]] = getattr(palette, color)
+    del color

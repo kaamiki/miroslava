@@ -5,16 +5,20 @@ import sys
 import textwrap
 from typing import Any
 
+__all__ = ["MiroslavaError"]
+
 
 class MiroslavaError(Exception):
     """Base exception class for all exceptions raised by Miroslava.
 
-    The ``valid`` argument ensures that the exceptions are raised
-    explicitly by the authors. This guarantees that all the known
-    corner cases in the framework are handled properly or patched
-    nonetheless.
-
     :var msg: Message to display while raising the exception.
+
+    .. note::
+
+        The ``valid`` keyword argument ensures that the exceptions are
+        raised explicitly by the authors. This guarantees that all the
+        known corner cases in the framework are handled properly or
+        patched nonetheless.
 
     """
 
