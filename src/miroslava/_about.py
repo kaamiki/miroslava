@@ -1,4 +1,4 @@
-"""All about miroslava."""
+"""All about Miroslava."""
 
 __all__ = [
     "__package__",
