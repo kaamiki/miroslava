@@ -1,12 +1,44 @@
-import os
-import os.path as _os
+"""Miroslava: A simple sandbox environment."""
 
-from .config.internal import LOGGER_PATH, ROOT_PATH
+try:
+    from ._about import __version__
+except ImportError:
+    __version__ = "0.0.0"
 
-if not _os.exists(ROOT_PATH):
-    os.mkdir(ROOT_PATH)
+from _miroslava import palette
+from _miroslava.track import BaseProtocol
+from _miroslava.utils import FileHandler
+from _miroslava.utils import Formatter
+from _miroslava.utils import Handler
+from _miroslava.utils import Logger
+from _miroslava.utils import MiroslavaError
+from _miroslava.utils import RotatingFileHandler
+from _miroslava.utils import SingletonMeta
+from _miroslava.utils import StreamHandler
+from _miroslava.utils import StreamHandlerHinter
+from _miroslava.utils import TimedRotatingFileHandler
+from _miroslava.utils import TTYPalette
+from _miroslava.utils import create_logger
+from _miroslava.utils import get_logger
+from _miroslava.utils import stderr
+from _miroslava.utils import stdout
 
-_paths = (LOGGER_PATH,)
-
-for _path in _paths:
-    os.makedirs(_path, exist_ok=True)
+__all__ = [
+    "palette",
+    "BaseProtocol",
+    "FileHandler",
+    "Formatter",
+    "Handler",
+    "Logger",
+    "MiroslavaError",
+    "RotatingFileHandler",
+    "SingletonMeta",
+    "StreamHandler",
+    "StreamHandlerHinter",
+    "TimedRotatingFileHandler",
+    "TTYPalette",
+    "create_logger",
+    "get_logger",
+    "stderr",
+    "stdout",
+]
