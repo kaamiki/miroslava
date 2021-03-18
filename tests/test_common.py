@@ -1,9 +1,9 @@
 import pytest
-from miroslava.utils import Singleton
-from miroslava.utils import TTYPalette
+from miroslava import SingletonMeta
+from miroslava import TTYPalette
 
 
-class TestSingletonClass(metaclass=Singleton):
+class TestSingletonClass(metaclass=SingletonMeta):
     pass
 
 
@@ -15,12 +15,12 @@ def test_singleton() -> None:
 
 
 @pytest.mark.parametrize(
-    ("color", "code"),
+    ("color", "expected"),
     (
         ("GOLD_1", "\u001b[38;5;220m"),
         ("ORANGE_1", "\u001b[38;5;214m"),
         ("PLUM_1", "\u001b[38;5;219m"),
     ),
 )
-def test_ttypalette(color: str, code: str) -> None:
-    assert getattr(TTYPalette, color) == code
+def test_ttypalette(color: str, expected: str) -> None:
+    assert getattr(TTYPalette, color) == expected
