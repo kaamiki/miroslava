@@ -6,7 +6,6 @@ except ImportError:
     __version__ = "0.0.0"
 
 from _miroslava import palette
-from _miroslava.track import BaseProtocol
 from _miroslava.utils import FileHandler
 from _miroslava.utils import Formatter
 from _miroslava.utils import Handler
@@ -25,7 +24,6 @@ from _miroslava.utils import stdout
 
 __all__ = [
     "palette",
-    "BaseProtocol",
     "FileHandler",
     "Formatter",
     "Handler",

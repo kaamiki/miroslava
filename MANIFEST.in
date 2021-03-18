@@ -6,3 +6,5 @@ include setup.py
 
 exclude .travis.yml
 exclude tox.ini
+
+recursive-include src *.typed 
